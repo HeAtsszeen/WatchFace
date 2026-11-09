@@ -51,6 +51,18 @@
   .err { color:#d93a3a; font-size:13px; min-height:1em; margin-top:6px; }
   footer { margin-top:26px; font-size:13px; color:var(--muted); text-align:center; }
   footer a { color:inherit; }
+  .check { display:flex; gap:10px; align-items:flex-start; font-size:14px; color:var(--ink); margin:0 0 14px; cursor:pointer; }
+  .check input { width:20px; height:20px; flex:0 0 20px; margin:2px 0 0; padding:0; accent-color:var(--accent); }
+  .legal { font-size:14px; color:var(--muted); }
+  .legal details { border-top:1px solid var(--line); padding:12px 0; }
+  .legal details:first-child { border-top:0; padding-top:0; }
+  .legal summary { cursor:pointer; font-weight:600; color:var(--ink); font-size:15px; }
+  .legal h3 { font-size:14px; color:var(--ink); margin:16px 0 4px; }
+  .legal p, .legal li { margin:0 0 8px; }
+  .legal ul { padding-left:18px; margin:0 0 8px; }
+  .legal .box { border:1px solid var(--line); border-radius:10px; padding:12px; margin-top:8px; }
+  .legal a { color:var(--accent); }
+  canvas.mail { vertical-align:-7px; }
   .linkish { background:none; border:0; padding:0; font:inherit; color:var(--accent); text-decoration:underline; cursor:pointer; }
 </style>
 </head>
@@ -60,7 +72,8 @@
     <div class="dial" aria-hidden="true"></div>
     <h1>Momento freischalten</h1>
     <p>Vollversion für deine Garmin-Uhr – einmalig, ohne Abo</p>
-    <span class="price">0,99 €</span>
+    <span class="price">3,49 €</span>
+    <p class="hint" style="margin-top:6px">Endpreis. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.</p>
   </header>
 
   <!-- Geräte-ID -->
@@ -88,10 +101,15 @@
     <div class="step">
       <div class="num">2</div>
       <div style="flex:1">
-        <h2>0,99 € per PayPal bezahlen</h2>
+        <h2>3,49 € per PayPal bezahlen</h2>
         <p>Der Betrag ist bereits eingetragen. Merke dir den <strong>Namen bzw. die E-Mail-Adresse deines PayPal-Kontos</strong> –
           du brauchst sie im nächsten Schritt, damit deine Zahlung zugeordnet werden kann.</p>
-        <a class="btn paypal" id="payBtn" href="#" target="_blank" rel="noopener">Mit PayPal bezahlen</a>
+        <label class="check"><input type="checkbox" id="consent">
+          <span>Ich stimme ausdrücklich zu, dass mir der Freischaltcode vor Ablauf der Widerrufsfrist geliefert wird.
+          Mir ist bekannt, dass ich mit Lieferung des Codes mein <a href="#widerruf" style="color:var(--accent)">Widerrufsrecht</a> verliere.</span></label>
+        <a class="btn paypal" id="payBtn" href="#" target="_blank" rel="noopener" aria-disabled="true">Mit PayPal bezahlen</a>
+        <p class="hint">Mit Klick auf „Mit PayPal bezahlen“ und der Zahlung kaufst du die Vollversion von Momento verbindlich.
+          Es gelten die <a href="#datenschutz" style="color:var(--accent)">Datenschutzhinweise</a>.</p>
       </div>
     </div>
   </section>
@@ -110,7 +128,7 @@
         <a class="btn mail" id="mailBtn" href="#">E-Mail öffnen</a>
         <p class="hint">Falls sich keine Mail-App öffnet:
           <button class="linkish" id="showAddr" type="button">Mailadresse anzeigen</button>
-          <span id="addrWrap" hidden>Schreibe an <strong id="mailAddr"></strong> mit deiner Geräte-ID.</span></p>
+          <span id="addrWrap" hidden>Schreibe an <span class="js-mail"></span> mit deiner Geräte-ID.</span></p>
       </div>
     </div>
   </section>
@@ -127,16 +145,128 @@
     </div>
   </section>
 
+  <!-- Rechtliches -->
+  <section class="card legal">
+    <details id="impressum">
+      <summary>Impressum</summary>
+      <h3>Angaben gemäß § 5 DDG</h3>
+      <p>Swen Kögler<br>Mühlendamm 27<br>48499 Salzbergen<br>Deutschland</p>
+      <h3>Kontakt</h3>
+      <p>Telefon: 0170 1901805<br>E-Mail: <span class="js-mail">(E-Mail-Adresse wird mit aktiviertem JavaScript angezeigt)</span></p>
+      <h3>Umsatzsteuer</h3>
+      <p>Kleinunternehmer gemäß § 19 UStG, es wird keine Umsatzsteuer ausgewiesen.</p>
+      <h3>Verbraucherstreitbeilegung</h3>
+      <p>Ich bin nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+    </details>
+
+    <details id="datenschutz">
+      <summary>Datenschutzerklärung</summary>
+      <h3>1. Verantwortlicher</h3>
+      <p>Swen Kögler, Mühlendamm 27, 48499 Salzbergen, Telefon 0170 1901805, E-Mail: <span class="js-mail">(E-Mail-Adresse wird mit aktiviertem JavaScript angezeigt)</span></p>
+
+      <h3>2. Aufruf dieser Seite (Hosting bei GitHub Pages)</h3>
+      <p>Diese Seite wird über GitHub Pages bereitgestellt (GitHub Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA).
+        Beim Aufruf verarbeitet GitHub technisch notwendige Daten wie deine IP-Adresse, Datum und Uhrzeit, die aufgerufene Seite und
+        Browserinformationen, um die Seite auszuliefern und die Sicherheit zu gewährleisten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
+        (berechtigtes Interesse an einer sicheren, funktionierenden Bereitstellung). Eine Übermittlung in die USA ist möglich; GitHub ist
+        unter dem EU-US Data Privacy Framework zertifiziert. Weitere Informationen:
+        <a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">Datenschutzerklärung von GitHub</a>.</p>
+
+      <h3>3. Keine Cookies, kein Tracking</h3>
+      <p>Diese Seite setzt keine Cookies, verwendet keine Analyse- oder Werbedienste und lädt keine Schriften oder Skripte von Drittanbietern.
+        Deine Geräte-ID und deine Eingaben werden ausschließlich in deinem Browser verarbeitet und nicht an mich oder Dritte gesendet,
+        bis du selbst die E-Mail abschickst.</p>
+
+      <h3>4. Bezahlung über PayPal</h3>
+      <p>Wenn du bezahlst, wirst du zu PayPal weitergeleitet (PayPal (Europe) S.à r.l. et Cie, S.C.A., 22-24 Boulevard Royal, L-2449 Luxemburg).
+        PayPal verarbeitet deine Zahlungsdaten in eigener Verantwortung. Ich erhalte von PayPal deinen Namen, deine PayPal-E-Mail-Adresse,
+        den Betrag und den Zeitpunkt der Zahlung. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung). Weitere Informationen:
+        <a href="https://www.paypal.com/de/legalhub/privacy-full" target="_blank" rel="noopener">Datenschutzerklärung von PayPal</a>.</p>
+
+      <h3>5. Anforderung des Freischaltcodes per E-Mail</h3>
+      <p>Für die Zusendung des Freischaltcodes verarbeite ich deine E-Mail-Adresse, deine Geräte-ID sowie den Namen bzw. die E-Mail-Adresse
+        deines PayPal-Kontos, um deine Zahlung zuzuordnen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO. Mein E-Mail-Postfach wird bei
+        Google (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland) betrieben; dabei kann eine Übermittlung in die USA
+        stattfinden, Google ist unter dem EU-US Data Privacy Framework zertifiziert.</p>
+
+      <h3>6. Speicherdauer</h3>
+      <p>Bestell- und Zahlungsdaten bewahre ich so lange auf, wie es die gesetzlichen Aufbewahrungspflichten verlangen
+        (nach Handels- und Steuerrecht in der Regel 8 bzw. 10 Jahre). Danach werden sie gelöscht. Die Geräte-ID behalte ich, solange
+        die Freischaltung genutzt werden kann, damit ich dir bei einem Gerätewechsel oder Rückfragen helfen kann.</p>
+
+      <h3>7. Das Watch Face auf deiner Uhr</h3>
+      <ul>
+        <li>Die Geräte-ID wird auf der Uhr aus einer Kennung des Geräts berechnet und nicht automatisch übertragen. Du gibst sie nur weiter, wenn du einen Freischaltcode anforderst.</li>
+        <li>Puls, Schritte, Kalender, Wetter und weitere Werte liest das Watch Face nur auf der Uhr aus und zeigt sie an. Sie werden nicht an mich übertragen.</li>
+        <li>Eigene Fotos: Wenn du Links oder einen Google-Drive-Ordner einträgst, lädt die Uhr die Bilder über die Garmin-Connect-App und die Server von Garmin aus dem Internet. Bei einem Ordner fragt sie mit deinem eigenen API-Schlüssel die Dateiliste bei Google ab. Dabei gelten die Datenschutzbestimmungen von Garmin und Google; ich erhalte diese Daten nicht.</li>
+        <li>Für den Download und die Einstellungen im Connect IQ Store ist Garmin verantwortlich.</li>
+      </ul>
+
+      <h3>8. Deine Rechte</h3>
+      <p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18),
+        Datenübertragbarkeit (Art. 20) und Widerspruch gegen Verarbeitungen auf Grundlage berechtigter Interessen (Art. 21).
+        Wende dich dazu einfach per E-Mail an mich. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren,
+        zum Beispiel bei der für mich zuständigen: Die Landesbeauftragte für den Datenschutz Niedersachsen, Prinzenstraße 5, 30159 Hannover.</p>
+      <p>Stand: November 2026</p>
+    </details>
+
+    <details id="widerruf">
+      <summary>Widerrufsbelehrung</summary>
+      <h3>Widerrufsrecht</h3>
+      <p>Du hast das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen.
+        Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsabschlusses.</p>
+      <p>Um dein Widerrufsrecht auszuüben, musst du mich (Swen Kögler, Mühlendamm 27, 48499 Salzbergen, Telefon 0170 1901805,
+        E-Mail: <span class="js-mail">(E-Mail-Adresse wird mit aktiviertem JavaScript angezeigt)</span>) mittels einer eindeutigen Erklärung (z. B. ein mit der Post versandter Brief
+        oder eine E-Mail) über deinen Entschluss, diesen Vertrag zu widerrufen, informieren. Du kannst dafür das unten stehende
+        Muster-Widerrufsformular verwenden, das jedoch nicht vorgeschrieben ist.</p>
+      <p>Zur Wahrung der Widerrufsfrist reicht es aus, dass du die Mitteilung über die Ausübung des Widerrufsrechts vor Ablauf der Widerrufsfrist absendest.</p>
+
+      <h3>Folgen des Widerrufs</h3>
+      <p>Wenn du diesen Vertrag widerrufst, habe ich dir alle Zahlungen, die ich von dir erhalten habe, unverzüglich und spätestens binnen
+        vierzehn Tagen ab dem Tag zurückzuzahlen, an dem die Mitteilung über deinen Widerruf dieses Vertrags bei mir eingegangen ist.
+        Für diese Rückzahlung verwende ich dasselbe Zahlungsmittel, das du bei der ursprünglichen Transaktion eingesetzt hast, es sei denn,
+        mit dir wurde ausdrücklich etwas anderes vereinbart; in keinem Fall werden dir wegen dieser Rückzahlung Entgelte berechnet.</p>
+
+      <h3>Vorzeitiges Erlöschen des Widerrufsrechts</h3>
+      <p>Das Widerrufsrecht erlischt bei einem Vertrag über die Bereitstellung von nicht auf einem körperlichen Datenträger befindlichen
+        digitalen Inhalten (hier: Freischaltcode für die Vollversion des Watch Faces Momento), wenn ich mit der Vertragserfüllung begonnen habe,
+        nachdem du</p>
+      <ul>
+        <li>ausdrücklich zugestimmt hast, dass ich vor Ablauf der Widerrufsfrist mit der Vertragserfüllung beginne,</li>
+        <li>deine Kenntnis davon bestätigt hast, dass du durch deine Zustimmung mit Beginn der Vertragserfüllung dein Widerrufsrecht verlierst, und</li>
+        <li>ich dir eine Bestätigung des Vertrags auf einem dauerhaften Datenträger (per E-Mail) zur Verfügung gestellt habe.</li>
+      </ul>
+      <p>Die Zustimmung erteilst du auf dieser Seite vor der Zahlung. Mit der Zusendung des Freischaltcodes, der zusammen mit der
+        Vertragsbestätigung per E-Mail erfolgt, erlischt dein Widerrufsrecht.</p>
+
+      <h3>Muster-Widerrufsformular</h3>
+      <div class="box">
+        <p>(Wenn du den Vertrag widerrufen willst, dann fülle bitte dieses Formular aus und sende es zurück.)</p>
+        <p>An Swen Kögler, Mühlendamm 27, 48499 Salzbergen, E-Mail: <span class="js-mail">(E-Mail-Adresse wird mit aktiviertem JavaScript angezeigt)</span></p>
+        <p>Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über die Bereitstellung der folgenden digitalen Inhalte:
+          Freischaltcode Watch Face „Momento“</p>
+        <p>Bestellt am (*) / erhalten am (*): ____________<br>
+          Name des/der Verbraucher(s): ____________<br>
+          Anschrift des/der Verbraucher(s): ____________<br>
+          Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier): ____________<br>
+          Datum: ____________</p>
+        <p>(*) Unzutreffendes streichen.</p>
+      </div>
+    </details>
+  </section>
+
   <footer>
-    Fragen? Nutze einfach den Button „E-Mail öffnen“.
+    Fragen? Nutze einfach den Button „E-Mail öffnen“.<br>
+    <a href="#impressum">Impressum</a> · <a href="#datenschutz">Datenschutz</a> · <a href="#widerruf">Widerrufsbelehrung</a>
   </footer>
 </main>
 
 <script>
   // ---- Konfiguration ----
-  // Mailadresse in Teilen, damit Adress-Sammler sie nicht im Quelltext finden
-  const EMAIL = ["swen.koegler", "gmail.com"].join(String.fromCharCode(64));
-  const PAYPAL_ME = "https://paypal.me/sja911/0.99EUR";   // Betrag und Währung bereits enthalten
+  // Mailadresse in Teilen, damit Adress-Sammler sie nicht im Quelltext finden.
+  // Auf der Seite erscheint sie nur als Bild, der mailto-Link entsteht erst beim Klick auf „E-Mail öffnen“.
+  const EMAIL = [["swen", "koegler"].join("."), ["gmail", "com"].join(".")].join(String.fromCharCode(64));
+  const PAYPAL_ME = "https://paypal.me/sja911/3.49EUR";   // Betrag und Währung bereits enthalten
   const APP_NAME = "Momento";
   // -----------------------
 
@@ -149,10 +279,12 @@
     const body =
 `Hallo,
 
-ich habe ${APP_NAME} per PayPal bezahlt (0,99 €) und bitte um meinen Freischaltcode.
+ich habe ${APP_NAME} per PayPal bezahlt (3,49 €) und bitte um meinen Freischaltcode.
 
 Meine Geräte-ID: ${id}
 Mein PayPal-Konto (Name/E-Mail): ${payer}
+
+Ich habe vor der Zahlung ausdrücklich zugestimmt, dass mir der Freischaltcode vor Ablauf der Widerrufsfrist geliefert wird, und bestätigt, dass ich mit der Lieferung mein Widerrufsrecht verliere.
 
 Vielen Dank!`;
     return `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -163,7 +295,6 @@ Vielen Dank!`;
   function updateMail() {
     const payer = $("payerInput").value.trim();
     const ok = currentId !== "" && payer.length >= 3;
-    $("mailBtn").href = ok ? mailHref(currentId, payer) : "#";
     $("mailBtn").setAttribute("aria-disabled", ok ? "false" : "true");
   }
 
@@ -175,9 +306,44 @@ Vielen Dank!`;
   }
 
   $("payerInput").addEventListener("input", updateMail);
+  $("mailBtn").addEventListener("click", e => {
+    e.preventDefault();
+    const payer = $("payerInput").value.trim();
+    if (currentId !== "" && payer.length >= 3) location.href = mailHref(currentId, payer);
+  });
+
+  // PayPal erst nach Zustimmung zum vorzeitigen Erlöschen des Widerrufsrechts
+  function updatePay() {
+    $("payBtn").setAttribute("aria-disabled", $("consent").checked ? "false" : "true");
+  }
+  $("consent").addEventListener("change", updatePay);
+  updatePay();
+
+  // Mailadresse in Impressum, Datenschutz und Widerruf erst per Skript einsetzen
+  // Adresse wird als Bild gezeichnet: kein Text und kein mailto-Link im Seiteninhalt
+  function mailImage(ref) {
+    const cs = getComputedStyle(ref);
+    const font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const c = document.createElement("canvas"), r = window.devicePixelRatio || 1;
+    const ctx = c.getContext("2d"); ctx.font = font;
+    const w = Math.ceil(ctx.measureText(EMAIL).width) + 2, h = Math.ceil(parseFloat(cs.fontSize) * 1.4);
+    c.width = w * r; c.height = h * r; c.style.width = w + "px"; c.style.height = h + "px";
+    c.className = "mail"; c.setAttribute("role", "img"); c.setAttribute("aria-label", "E-Mail-Adresse (Bild)");
+    ctx.scale(r, r); ctx.font = font; ctx.fillStyle = cs.color; ctx.textBaseline = "middle";
+    ctx.fillText(EMAIL, 1, h / 2);
+    return c;
+  }
+  document.querySelectorAll(".js-mail").forEach(el => el.replaceWith(mailImage(el.parentElement)));
+
+  // Rechtstexte beim Sprung per Link (#impressum usw.) aufklappen
+  function openFromHash() {
+    const d = location.hash && document.querySelector("details" + location.hash);
+    if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  }
+  window.addEventListener("hashchange", openFromHash);
+  openFromHash();
 
   $("showAddr").addEventListener("click", () => {
-    $("mailAddr").textContent = EMAIL;
     $("addrWrap").hidden = false;
     $("showAddr").hidden = true;
   });
