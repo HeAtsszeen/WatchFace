@@ -49,6 +49,7 @@
   .err { color:#d93a3a; font-size:13px; min-height:1em; margin-top:6px; }
   footer { margin-top:26px; font-size:13px; color:var(--muted); text-align:center; }
   footer a { color:inherit; }
+  .linkish { background:none; border:0; padding:0; font:inherit; color:var(--accent); text-decoration:underline; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -86,7 +87,12 @@
       <div class="num">2</div>
       <div style="flex:1">
         <h2>0,99 € per PayPal bezahlen</h2>
-        <p>Der Betrag ist bereits eingetragen. Gib als Nachricht deine Geräte-ID an.</p>
+        <p>Der Betrag ist bereits eingetragen. Schreibe bei PayPal als <strong>Nachricht nur deine Geräte-ID</strong> –
+          daran wird deine Zahlung deiner Code-Anfrage zugeordnet.</p>
+        <div class="row" id="payIdRow" hidden style="margin-bottom:12px">
+          <span>Nachricht:</span><strong id="payId" style="font-family:ui-monospace,Consolas,monospace;letter-spacing:2px"></strong>
+          <button class="btn small" id="copyPayId" type="button">Kopieren</button>
+        </div>
         <a class="btn paypal" id="payBtn" href="#" target="_blank" rel="noopener">Mit PayPal bezahlen</a>
       </div>
     </div>
@@ -98,9 +104,12 @@
       <div class="num">3</div>
       <div style="flex:1">
         <h2>Freischaltcode anfordern</h2>
-        <p>Öffnet deine Mail-App mit einer fertigen Nachricht inklusive Geräte-ID. Einfach absenden.</p>
+        <p>Öffnet deine Mail-App mit einer fertigen Nachricht inklusive Geräte-ID. Einfach absenden –
+          der Freischaltcode kommt als Antwort an genau diese E-Mail-Adresse.</p>
         <a class="btn mail" id="mailBtn" href="#">E-Mail öffnen</a>
-        <p class="hint">Falls sich keine Mail-App öffnet: Schreibe an <strong id="mailAddr"></strong> mit deiner Geräte-ID.</p>
+        <p class="hint">Falls sich keine Mail-App öffnet:
+          <button class="linkish" id="showAddr" type="button">Mailadresse anzeigen</button>
+          <span id="addrWrap" hidden>Schreibe an <strong id="mailAddr"></strong> mit deiner Geräte-ID.</span></p>
       </div>
     </div>
   </section>
@@ -118,13 +127,14 @@
   </section>
 
   <footer>
-    Fragen? <a id="mailFooter" href="#"></a>
+    Fragen? Nutze einfach den Button „E-Mail öffnen“.
   </footer>
 </main>
 
 <script>
   // ---- Konfiguration ----
-  const EMAIL = "swen.koegler@gmail.com";
+  // Mailadresse in Teilen, damit Adress-Sammler sie nicht im Quelltext finden
+  const EMAIL = ["swen.koegler", "gmail.com"].join(String.fromCharCode(64));
   const PAYPAL_ME = "https://paypal.me/sja911/0.99EUR";   // Betrag und Währung bereits enthalten
   const APP_NAME = "WatchFace_1";
   // -----------------------
@@ -141,7 +151,7 @@
 ich habe ${APP_NAME} per PayPal bezahlt (0,99 €) und bitte um meinen Freischaltcode.
 
 Meine Geräte-ID: ${id}
-Name bzw. E-Mail meines PayPal-Kontos:
+(Falls ich die Geräte-ID bei PayPal vergessen habe – Name meines PayPal-Kontos: )
 
 Vielen Dank!`;
     return `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -153,12 +163,16 @@ Vielen Dank!`;
     $("mailBtn").href = ok ? mailHref(id) : "#";
     $("mailBtn").setAttribute("aria-disabled", ok ? "false" : "true");
     $("payBtn").href = PAYPAL_ME;
+    $("payIdRow").hidden = !ok;
+    $("payId").textContent = id;
     return id;
   }
 
-  $("mailAddr").textContent = EMAIL;
-  $("mailFooter").textContent = EMAIL;
-  $("mailFooter").href = "mailto:" + EMAIL;
+  $("showAddr").addEventListener("click", () => {
+    $("mailAddr").textContent = EMAIL;
+    $("addrWrap").hidden = false;
+    $("showAddr").hidden = true;
+  });
 
   // Geräte-ID aus dem Link (?id=A3F9-12C7) übernehmen, sonst eingeben lassen
   const fromUrl = normalize(new URLSearchParams(location.search).get("id"));
@@ -174,6 +188,10 @@ Vielen Dank!`;
       apply(raw.length === 8 ? raw : "");
     });
   }
+
+  $("copyPayId").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText($("payId").textContent); $("copyPayId").textContent = "Kopiert ✓"; } catch (e) {}
+  });
 
   $("copyId").addEventListener("click", async () => {
     try { await navigator.clipboard.writeText($("idText").textContent); $("copyId").textContent = "Kopiert ✓"; } catch (e) {}
