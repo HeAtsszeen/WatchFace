@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>WatchFace_1 freischalten</title>
+<style>
+  :root {
+    --bg:#f5f3ef; --card:#ffffff; --ink:#1c1b1f; --muted:#67646d; --line:#e4e0d8;
+    --accent:#e8742c; --accent-ink:#ffffff; --ok:#2f9e5b; --paypal:#0070e0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#121214; --card:#1c1c20; --ink:#f1f0f3; --muted:#a19ea8; --line:#2f2e34; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:520px; margin:0 auto; padding:28px 16px 48px; }
+  header { text-align:center; margin-bottom:22px; }
+  .dial { width:72px; height:72px; margin:0 auto 12px; border-radius:50%;
+          background:radial-gradient(circle at 50% 70%, #ffd27a 0 14%, transparent 15%),
+                     linear-gradient(#2a1d4a, #7a3a62 55%, #e8742c 56%, #2a2036 57%);
+          border:4px solid #2b2b30; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  header p { margin:0; color:var(--muted); }
+  .price { display:inline-block; margin-top:10px; padding:4px 12px; border-radius:999px;
+           background:color-mix(in srgb, var(--accent) 15%, transparent); color:var(--accent); font-weight:700; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:14px; }
+  .step { display:flex; gap:14px; }
+  .num { flex:0 0 30px; height:30px; border-radius:50%; background:var(--accent); color:var(--accent-ink);
+         display:grid; place-items:center; font-weight:700; }
+  .step h2 { font-size:17px; margin:2px 0 6px; }
+  .step p { margin:0 0 12px; color:var(--muted); font-size:15px; }
+  .id { font:700 26px/1.2 ui-monospace, Consolas, monospace; letter-spacing:3px; }
+  .row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%;
+         padding:13px 16px; border-radius:12px; border:0; font:600 16px/1 inherit; font-family:inherit;
+         text-decoration:none; cursor:pointer; }
+  .btn.paypal { background:var(--paypal); color:#fff; }
+  .btn.mail { background:var(--accent); color:var(--accent-ink); }
+  .btn.small { width:auto; padding:8px 12px; font-size:14px; background:transparent; color:var(--ink);
+               border:1px solid var(--line); }
+  .btn[aria-disabled="true"] { opacity:.45; pointer-events:none; }
+  input { width:100%; font:600 22px/1 ui-monospace, Consolas, monospace; letter-spacing:2px; text-transform:uppercase;
+          padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:transparent; color:var(--ink); }
+  input:focus { outline:2px solid var(--accent); border-color:transparent; }
+  .hint { font-size:13px; color:var(--muted); margin-top:8px; }
+  .err { color:#d93a3a; font-size:13px; min-height:1em; margin-top:6px; }
+  footer { margin-top:26px; font-size:13px; color:var(--muted); text-align:center; }
+  footer a { color:inherit; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="dial" aria-hidden="true"></div>
+    <h1>WatchFace_1 freischalten</h1>
+    <p>Vollversion für deine Garmin-Uhr – einmalig, ohne Abo</p>
+    <span class="price">0,99 €</span>
+  </header>
+
+  <!-- Geräte-ID -->
+  <section class="card">
+    <div class="step">
+      <div class="num">1</div>
+      <div style="flex:1">
+        <h2>Deine Geräte-ID</h2>
+        <div id="idShow" hidden>
+          <div class="row"><span class="id" id="idText"></span>
+            <button class="btn small" id="copyId" type="button">Kopieren</button></div>
+          <p class="hint">Steht auch in der Garmin-Connect-App in den Einstellungen des Watch Faces.</p>
+        </div>
+        <div id="idEnter" hidden>
+          <p>Du findest sie in der Garmin-Connect-App unter den Einstellungen des Watch Faces („Geräte-ID“).</p>
+          <input id="idInput" placeholder="A3F9-12C7" maxlength="9" autocomplete="off" inputmode="text">
+          <div class="err" id="idErr"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bezahlen -->
+  <section class="card">
+    <div class="step">
+      <div class="num">2</div>
+      <div style="flex:1">
+        <h2>0,99 € per PayPal bezahlen</h2>
+        <p>Der Betrag ist bereits eingetragen. Gib als Nachricht deine Geräte-ID an.</p>
+        <a class="btn paypal" id="payBtn" href="#" target="_blank" rel="noopener">Mit PayPal bezahlen</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Code anfordern -->
+  <section class="card">
+    <div class="step">
+      <div class="num">3</div>
+      <div style="flex:1">
+        <h2>Freischaltcode anfordern</h2>
+        <p>Öffnet deine Mail-App mit einer fertigen Nachricht inklusive Geräte-ID. Einfach absenden.</p>
+        <a class="btn mail" id="mailBtn" href="#">E-Mail öffnen</a>
+        <p class="hint">Falls sich keine Mail-App öffnet: Schreibe an <strong id="mailAddr"></strong> mit deiner Geräte-ID.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Eintragen -->
+  <section class="card">
+    <div class="step">
+      <div class="num">4</div>
+      <div style="flex:1">
+        <h2>Code eintragen</h2>
+        <p style="margin-bottom:0">Du bekommst deinen Code per Mail. Trage ihn in der Garmin-Connect-App unter
+          <strong>Watch Faces → WatchFace_1 → Einstellungen → Freischaltcode</strong> ein und speichere. Fertig!</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Fragen? <a id="mailFooter" href="#"></a>
+  </footer>
+</main>
+
+<script>
+  // ---- Konfiguration ----
+  const EMAIL = "swen.koegler@gmail.com";
+  const PAYPAL_ME = "https://paypal.me/sja911/0.99EUR";   // Betrag und Währung bereits enthalten
+  const APP_NAME = "WatchFace_1";
+  // -----------------------
+
+  const $ = id => document.getElementById(id);
+  const normalize = s => (s || "").toUpperCase().replace(/[^0-9A-F]/g, "");
+  const dashed = s => s.slice(0, 4) + "-" + s.slice(4);
+
+  function mailHref(id) {
+    const subject = `Freischaltcode ${APP_NAME} – Geräte-ID ${id}`;
+    const body =
+`Hallo,
+
+ich habe ${APP_NAME} per PayPal bezahlt (0,99 €) und bitte um meinen Freischaltcode.
+
+Meine Geräte-ID: ${id}
+Name bzw. E-Mail meines PayPal-Kontos:
+
+Vielen Dank!`;
+    return `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
+  function apply(raw) {
+    const ok = raw.length === 8;
+    const id = ok ? dashed(raw) : "";
+    $("mailBtn").href = ok ? mailHref(id) : "#";
+    $("mailBtn").setAttribute("aria-disabled", ok ? "false" : "true");
+    $("payBtn").href = PAYPAL_ME;
+    return id;
+  }
+
+  $("mailAddr").textContent = EMAIL;
+  $("mailFooter").textContent = EMAIL;
+  $("mailFooter").href = "mailto:" + EMAIL;
+
+  // Geräte-ID aus dem Link (?id=A3F9-12C7) übernehmen, sonst eingeben lassen
+  const fromUrl = normalize(new URLSearchParams(location.search).get("id"));
+  if (fromUrl.length === 8) {
+    $("idShow").hidden = false;
+    $("idText").textContent = apply(fromUrl);
+  } else {
+    $("idEnter").hidden = false;
+    apply("");
+    $("idInput").addEventListener("input", e => {
+      const raw = normalize(e.target.value);
+      $("idErr").textContent = raw.length > 8 ? "Die Geräte-ID hat genau 8 Zeichen (0–9, A–F)." : "";
+      apply(raw.length === 8 ? raw : "");
+    });
+  }
+
+  $("copyId").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText($("idText").textContent); $("copyId").textContent = "Kopiert ✓"; } catch (e) {}
+  });
+</script>
+</body>
+</html>
