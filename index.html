@@ -45,6 +45,8 @@
   input { width:100%; font:600 22px/1 ui-monospace, Consolas, monospace; letter-spacing:2px; text-transform:uppercase;
           padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:transparent; color:var(--ink); }
   input:focus { outline:2px solid var(--accent); border-color:transparent; }
+  .lbl { display:block; font-size:14px; font-weight:600; margin-bottom:6px; }
+  input.txt { font-weight:400; font-size:16px; font-family:inherit; letter-spacing:normal; text-transform:none; }
   .hint { font-size:13px; color:var(--muted); margin-top:8px; }
   .err { color:#d93a3a; font-size:13px; min-height:1em; margin-top:6px; }
   footer { margin-top:26px; font-size:13px; color:var(--muted); text-align:center; }
@@ -87,12 +89,8 @@
       <div class="num">2</div>
       <div style="flex:1">
         <h2>0,99 € per PayPal bezahlen</h2>
-        <p>Der Betrag ist bereits eingetragen. Schreibe bei PayPal als <strong>Nachricht nur deine Geräte-ID</strong> –
-          daran wird deine Zahlung deiner Code-Anfrage zugeordnet.</p>
-        <div class="row" id="payIdRow" hidden style="margin-bottom:12px">
-          <span>Nachricht:</span><strong id="payId" style="font-family:ui-monospace,Consolas,monospace;letter-spacing:2px"></strong>
-          <button class="btn small" id="copyPayId" type="button">Kopieren</button>
-        </div>
+        <p>Der Betrag ist bereits eingetragen. Merke dir den <strong>Namen bzw. die E-Mail-Adresse deines PayPal-Kontos</strong> –
+          du brauchst sie im nächsten Schritt, damit deine Zahlung zugeordnet werden kann.</p>
         <a class="btn paypal" id="payBtn" href="#" target="_blank" rel="noopener">Mit PayPal bezahlen</a>
       </div>
     </div>
@@ -106,6 +104,9 @@
         <h2>Freischaltcode anfordern</h2>
         <p>Öffnet deine Mail-App mit einer fertigen Nachricht inklusive Geräte-ID. Einfach absenden –
           der Freischaltcode kommt als Antwort an genau diese E-Mail-Adresse.</p>
+        <label class="lbl" for="payerInput">Name oder E-Mail deines PayPal-Kontos</label>
+        <input id="payerInput" class="txt" placeholder="z. B. Max Mustermann" autocomplete="name">
+        <p class="hint" style="margin:6px 0 12px">Damit wird deine Zahlung deiner Anfrage zugeordnet.</p>
         <a class="btn mail" id="mailBtn" href="#">E-Mail öffnen</a>
         <p class="hint">Falls sich keine Mail-App öffnet:
           <button class="linkish" id="showAddr" type="button">Mailadresse anzeigen</button>
@@ -143,7 +144,7 @@
   const normalize = s => (s || "").toUpperCase().replace(/[^0-9A-F]/g, "");
   const dashed = s => s.slice(0, 4) + "-" + s.slice(4);
 
-  function mailHref(id) {
+  function mailHref(id, payer) {
     const subject = `Freischaltcode ${APP_NAME} – Geräte-ID ${id}`;
     const body =
 `Hallo,
@@ -151,22 +152,29 @@
 ich habe ${APP_NAME} per PayPal bezahlt (0,99 €) und bitte um meinen Freischaltcode.
 
 Meine Geräte-ID: ${id}
-(Falls ich die Geräte-ID bei PayPal vergessen habe – Name meines PayPal-Kontos: )
+Mein PayPal-Konto (Name/E-Mail): ${payer}
 
 Vielen Dank!`;
     return `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
 
-  function apply(raw) {
-    const ok = raw.length === 8;
-    const id = ok ? dashed(raw) : "";
-    $("mailBtn").href = ok ? mailHref(id) : "#";
+  let currentId = "";
+
+  function updateMail() {
+    const payer = $("payerInput").value.trim();
+    const ok = currentId !== "" && payer.length >= 3;
+    $("mailBtn").href = ok ? mailHref(currentId, payer) : "#";
     $("mailBtn").setAttribute("aria-disabled", ok ? "false" : "true");
-    $("payBtn").href = PAYPAL_ME;
-    $("payIdRow").hidden = !ok;
-    $("payId").textContent = id;
-    return id;
   }
+
+  function apply(raw) {
+    currentId = raw.length === 8 ? dashed(raw) : "";
+    $("payBtn").href = PAYPAL_ME;
+    updateMail();
+    return currentId;
+  }
+
+  $("payerInput").addEventListener("input", updateMail);
 
   $("showAddr").addEventListener("click", () => {
     $("mailAddr").textContent = EMAIL;
@@ -188,10 +196,6 @@ Vielen Dank!`;
       apply(raw.length === 8 ? raw : "");
     });
   }
-
-  $("copyPayId").addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText($("payId").textContent); $("copyPayId").textContent = "Kopiert ✓"; } catch (e) {}
-  });
 
   $("copyId").addEventListener("click", async () => {
     try { await navigator.clipboard.writeText($("idText").textContent); $("copyId").textContent = "Kopiert ✓"; } catch (e) {}
