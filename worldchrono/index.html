@@ -1,1 +1,672 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../assets/worldchrono/icon.png">
+<title>World Chrono freischalten</title>
+<style>
+  :root {
+    --bg:#f5f3ef; --card:#ffffff; --ink:#1c1b1f; --muted:#67646d; --line:#e4e0d8;
+    --accent:#e8742c; --accent-ink:#ffffff; --ok:#2f9e5b; --paypal:#0070e0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#121214; --card:#1c1c20; --ink:#f1f0f3; --muted:#a19ea8; --line:#2f2e34; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:520px; margin:0 auto; padding:28px 16px 48px; }
+  header { text-align:center; margin-bottom:22px; }
+  .appicon { display:block; margin:0 auto 12px; border-radius:50%; }
+  .dial { width:72px; height:72px; margin:0 auto 12px; border-radius:50%;
+          background:radial-gradient(circle at 50% 70%, #ffd27a 0 14%, transparent 15%),
+                     linear-gradient(#2a1d4a, #7a3a62 55%, #e8742c 56%, #2a2036 57%);
+          border:4px solid #2b2b30; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  header p { margin:0; color:var(--muted); }
+  .price { display:inline-block; margin-top:10px; padding:4px 12px; border-radius:999px;
+           background:color-mix(in srgb, var(--accent) 15%, transparent); color:var(--accent); font-weight:700; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:14px; }
+  .step { display:flex; gap:14px; }
+  .num { flex:0 0 30px; height:30px; border-radius:50%; background:var(--accent); color:var(--accent-ink);
+         display:grid; place-items:center; font-weight:700; }
+  .step h2 { font-size:17px; margin:2px 0 6px; }
+  .step p { margin:0 0 12px; color:var(--muted); font-size:15px; }
+  .id { font:700 26px/1.2 ui-monospace, Consolas, monospace; letter-spacing:3px; }
+  .row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%;
+         padding:13px 16px; border-radius:12px; border:0; font:600 16px/1 inherit; font-family:inherit;
+         text-decoration:none; cursor:pointer; }
+  .btn.paypal { background:var(--paypal); color:#fff; }
+  .btn.mail { background:var(--accent); color:var(--accent-ink); }
+  .btn.small { width:auto; padding:8px 12px; font-size:14px; background:transparent; color:var(--ink);
+               border:1px solid var(--line); }
+  .btn[aria-disabled="true"] { opacity:.45; pointer-events:none; }
+  input { width:100%; font:600 22px/1 ui-monospace, Consolas, monospace; letter-spacing:2px; text-transform:uppercase;
+          padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:transparent; color:var(--ink); }
+  input:focus { outline:2px solid var(--accent); border-color:transparent; }
+  .lbl { display:block; font-size:14px; font-weight:600; margin-bottom:6px; }
+  input.txt { font-weight:400; font-size:16px; font-family:inherit; letter-spacing:normal; text-transform:none; }
+  .hint { font-size:13px; color:var(--muted); margin-top:8px; }
+  .err { color:#d93a3a; font-size:13px; min-height:1em; margin-top:6px; }
+  footer { margin-top:26px; font-size:13px; color:var(--muted); text-align:center; }
+  footer a { color:inherit; }
+  .check { display:flex; gap:10px; align-items:flex-start; font-size:14px; color:var(--ink); margin:0 0 14px; cursor:pointer; }
+  .check input { width:20px; height:20px; flex:0 0 20px; margin:2px 0 0; padding:0; accent-color:var(--accent); }
+  .legal { font-size:14px; color:var(--muted); }
+  .legal details { border-top:1px solid var(--line); padding:12px 0; }
+  .legal details:first-child { border-top:0; padding-top:0; }
+  .legal summary { cursor:pointer; font-weight:600; color:var(--ink); font-size:15px; }
+  .legal h3 { font-size:14px; color:var(--ink); margin:16px 0 4px; }
+  .legal p, .legal li { margin:0 0 8px; }
+  .legal ul { padding-left:18px; margin:0 0 8px; }
+  .legal .box { border:1px solid var(--line); border-radius:10px; padding:12px; margin-top:8px; }
+  .legal a { color:var(--accent); }
+  canvas.mail { vertical-align:-7px; }
+  .langs { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin:0 0 14px; }
+  .langs button { border:1px solid var(--line); background:transparent; color:var(--muted); border-radius:999px;
+                  padding:4px 10px; font:600 13px/1 inherit; font-family:inherit; cursor:pointer; }
+  .langs button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .legalnote { font-size:13px; color:var(--muted); margin:0 0 12px; }
+  .linkish { background:none; border:0; padding:0; font:inherit; color:var(--accent); text-decoration:underline; cursor:pointer; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <nav class="langs" id="langs" aria-label="Sprache / Language">
+      <button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button><button type="button" data-lang="fr">FR</button><button type="button" data-lang="es">ES</button><button type="button" data-lang="it">IT</button><button type="button" data-lang="nl">NL</button>
+    </nav>
+    <img class="appicon" src="../assets/worldchrono/icon.png" alt="" width="88" height="88">
+    <h1 data-i18n="title">„World Chrono“ freischalten</h1>
+    <p data-i18n="subtitle">Vollversion für deine Garmin-Uhr – einmalig, ohne Abo</p>
+    <span class="price" data-i18n="price">1,99 €</span>
+    <p class="hint" style="margin-top:6px" data-i18n="vatNote">Endpreis. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.</p>
+  </header>
 
+  <!-- Geräte-ID -->
+  <section class="card">
+    <div class="step">
+      <div class="num">1</div>
+      <div style="flex:1">
+        <h2 data-i18n="s1h">Deine Geräte-ID</h2>
+        <div id="idShow" hidden>
+          <div class="row"><span class="id" id="idText"></span>
+            <button class="btn small" id="copyId" type="button" data-i18n="copy">Kopieren</button></div>
+          <p class="hint" data-i18n="idHintShow">Steht auch in der Garmin-Connect-App in den Einstellungen des Watch Faces.</p>
+        </div>
+        <div id="idEnter" hidden>
+          <p data-i18n="idHintEnter">Du findest sie in der Garmin-Connect-App unter den Einstellungen des Watch Faces im Feld „Freischaltung“.</p>
+          <input id="idInput" placeholder="A3F9-12C7" maxlength="9" autocomplete="off" inputmode="text">
+          <div class="err" id="idErr"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bezahlen -->
+  <section class="card">
+    <div class="step">
+      <div class="num">2</div>
+      <div style="flex:1">
+        <h2 data-i18n="s2h">1,99 € per PayPal bezahlen</h2>
+        <p data-i18n="s2p">Der Betrag ist bereits eingetragen. Merke dir den <strong>Namen bzw. die E-Mail-Adresse deines PayPal-Kontos</strong> –
+          du brauchst sie im nächsten Schritt, damit deine Zahlung zugeordnet werden kann.</p>
+        <label class="check"><input type="checkbox" id="consent">
+          <span data-i18n="consent">Ich stimme ausdrücklich zu, dass mir der Freischaltcode vor Ablauf der Widerrufsfrist geliefert wird.
+          Mir ist bekannt, dass ich mit Lieferung des Codes mein <a href="#widerruf" style="color:var(--accent)">Widerrufsrecht</a> verliere.</span></label>
+        <a class="btn paypal" id="payBtn" href="#" target="_blank" rel="noopener" aria-disabled="true" data-i18n="payBtn">Mit PayPal bezahlen</a>
+        <p class="hint" data-i18n="payHint">Mit Klick auf „Mit PayPal bezahlen“ und der Zahlung kaufst du die Vollversion von „World Chrono“ verbindlich.
+          Es gelten die <a href="#datenschutz" style="color:var(--accent)">Datenschutzhinweise</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Code anfordern -->
+  <section class="card">
+    <div class="step">
+      <div class="num">3</div>
+      <div style="flex:1">
+        <h2 data-i18n="s3h">Freischaltcode anfordern</h2>
+        <p data-i18n="s3p">Öffnet deine Mail-App mit einer fertigen Nachricht inklusive Geräte-ID. Einfach absenden –
+          der Freischaltcode kommt als Antwort an genau diese E-Mail-Adresse.</p>
+        <label class="lbl" for="payerInput" data-i18n="payerLbl">Name oder E-Mail deines PayPal-Kontos</label>
+        <input id="payerInput" class="txt" placeholder="z. B. Max Mustermann" data-i18n-ph="payerPh" autocomplete="name">
+        <p class="hint" style="margin:6px 0 12px" data-i18n="payerHint">Damit wird deine Zahlung deiner Anfrage zugeordnet.</p>
+        <a class="btn mail" id="mailBtn" href="#" data-i18n="mailBtn">E-Mail öffnen</a>
+        <p class="hint"><span data-i18n="noMail">Falls sich keine Mail-App öffnet:</span>
+          <button class="linkish" id="showAddr" type="button" data-i18n="showAddr">Mailadresse anzeigen</button>
+          <span id="addrWrap" hidden><span data-i18n="writeTo">Schreibe mit deiner Geräte-ID an:</span> <span class="js-mail"></span></span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Eintragen -->
+  <section class="card">
+    <div class="step">
+      <div class="num">4</div>
+      <div style="flex:1">
+        <h2 data-i18n="s4h">Code eintragen</h2>
+        <p style="margin-bottom:0" data-i18n="s4p">Du bekommst deinen Code per Mail. Trage ihn in der Garmin-Connect-App unter
+          <strong>Watch Faces → World Chrono → Einstellungen → Freischaltcode</strong> ein und speichere. Fertig!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rechtliches -->
+  <section class="card legal">
+    <p class="legalnote" id="legalNote" hidden data-i18n="legalNote"></p>
+    <details id="impressum">
+      <summary data-i18n="impressum">Impressum</summary>
+      <div class="lg-de" lang="de">
+      <h3>Angaben gemäß § 5 DDG</h3>
+      <p>Swen Kögler<br>Mühlendamm 27<br>48499 Salzbergen<br>Deutschland</p>
+      <h3>Kontakt</h3>
+      <p>Telefon: +49 5976 6079997<br>E-Mail: <span class="js-mail">(E-Mail-Adresse wird mit aktiviertem JavaScript angezeigt)</span></p>
+      <h3>Umsatzsteuer</h3>
+      <p>Kleinunternehmer gemäß § 19 UStG, es wird keine Umsatzsteuer ausgewiesen.</p>
+      <h3>Verbraucherstreitbeilegung</h3>
+      <p>Ich bin nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+      </div>
+      <div class="lg-en" lang="en" hidden>
+      <h3>Information pursuant to § 5 DDG (German Digital Services Act)</h3>
+      <p>Swen Kögler<br>Mühlendamm 27<br>48499 Salzbergen<br>Germany</p>
+      <h3>Contact</h3>
+      <p>Phone: +49 5976 6079997<br>Email: <span class="js-mail">(email address is shown with JavaScript enabled)</span></p>
+      <h3>VAT</h3>
+      <p>Small business pursuant to § 19 UStG (German VAT Act); no VAT is charged.</p>
+      <h3>Consumer dispute resolution</h3>
+      <p>I am neither obliged nor willing to take part in dispute resolution proceedings before a consumer arbitration board.</p>
+      </div>
+    </details>
+
+    <details id="datenschutz">
+      <summary data-i18n="datenschutz">Datenschutzerklärung</summary>
+      <div class="lg-de" lang="de">
+      <h3>1. Verantwortlicher</h3>
+      <p>Swen Kögler, Mühlendamm 27, 48499 Salzbergen, E-Mail: <span class="js-mail">(E-Mail-Adresse wird mit aktiviertem JavaScript angezeigt)</span></p>
+
+      <h3>2. Aufruf dieser Seite (Hosting bei GitHub Pages)</h3>
+      <p>Diese Seite wird über GitHub Pages bereitgestellt (GitHub Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA).
+        Beim Aufruf verarbeitet GitHub technisch notwendige Daten wie deine IP-Adresse, Datum und Uhrzeit, die aufgerufene Seite und
+        Browserinformationen, um die Seite auszuliefern und die Sicherheit zu gewährleisten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
+        (berechtigtes Interesse an einer sicheren, funktionierenden Bereitstellung). Eine Übermittlung in die USA ist möglich; GitHub ist
+        unter dem EU-US Data Privacy Framework zertifiziert. Weitere Informationen:
+        <a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">Datenschutzerklärung von GitHub</a>.</p>
+
+      <h3>3. Keine Cookies, kein Tracking</h3>
+      <p>Diese Seite setzt keine Cookies, verwendet keine Analyse- oder Werbedienste und lädt keine Schriften oder Skripte von Drittanbietern. Nur deine Sprachwahl wird in deinem Browser gespeichert.
+        Deine Geräte-ID und deine Eingaben werden ausschließlich in deinem Browser verarbeitet und nicht an mich oder Dritte gesendet,
+        bis du selbst die E-Mail abschickst.</p>
+
+      <h3>4. Bezahlung über PayPal</h3>
+      <p>Wenn du bezahlst, wirst du zu PayPal weitergeleitet (PayPal (Europe) S.à r.l. et Cie, S.C.A., 22-24 Boulevard Royal, L-2449 Luxemburg).
+        PayPal verarbeitet deine Zahlungsdaten in eigener Verantwortung. Ich erhalte von PayPal deinen Namen, deine PayPal-E-Mail-Adresse,
+        den Betrag und den Zeitpunkt der Zahlung. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung). Weitere Informationen:
+        <a href="https://www.paypal.com/de/legalhub/privacy-full" target="_blank" rel="noopener">Datenschutzerklärung von PayPal</a>.</p>
+
+      <h3>5. Anforderung des Freischaltcodes per E-Mail</h3>
+      <p>Für die Zusendung des Freischaltcodes verarbeite ich deine E-Mail-Adresse, deine Geräte-ID sowie den Namen bzw. die E-Mail-Adresse
+        deines PayPal-Kontos, um deine Zahlung zuzuordnen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO. Mein E-Mail-Postfach wird bei
+        Google (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland) betrieben; dabei kann eine Übermittlung in die USA
+        stattfinden, Google ist unter dem EU-US Data Privacy Framework zertifiziert.</p>
+
+      <h3>6. Speicherdauer</h3>
+      <p>Bestell- und Zahlungsdaten bewahre ich so lange auf, wie es die gesetzlichen Aufbewahrungspflichten verlangen
+        (nach Handels- und Steuerrecht in der Regel 8 bzw. 10 Jahre). Danach werden sie gelöscht. Die Geräte-ID behalte ich, solange
+        die Freischaltung genutzt werden kann, damit ich dir bei einem Gerätewechsel oder Rückfragen helfen kann.</p>
+
+      <h3>7. Das Watch Face auf deiner Uhr</h3>
+      <ul>
+        <li>Die Geräte-ID wird auf der Uhr aus einer Kennung des Geräts berechnet und nicht automatisch übertragen. Du gibst sie nur weiter, wenn du einen Freischaltcode anforderst.</li>
+        <li>Puls, Schritte, Body Battery, Wetter und weitere Werte liest das Watch Face nur auf der Uhr aus und zeigt sie an. Sie werden nicht an mich übertragen.</li>
+        <li>Wetter, Sonnenauf- und -untergang: Diese Werte stellt die Garmin-Connect-App bzw. Garmin auf der Uhr bereit; das Watch Face ruft dafür selbst keine Internetdienste auf.</li>
+        <li>Für den Download und die Einstellungen im Connect IQ Store ist Garmin verantwortlich.</li>
+      </ul>
+
+      <h3>8. Deine Rechte</h3>
+      <p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18),
+        Datenübertragbarkeit (Art. 20) und Widerspruch gegen Verarbeitungen auf Grundlage berechtigter Interessen (Art. 21).
+        Wende dich dazu einfach per E-Mail an mich. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren,
+        zum Beispiel bei der für mich zuständigen: Die Landesbeauftragte für den Datenschutz Niedersachsen, Prinzenstraße 5, 30159 Hannover.</p>
+      <p>Stand: November 2026</p>
+      </div>
+      <div class="lg-en" lang="en" hidden>
+      <h3>1. Controller</h3>
+      <p>Swen Kögler, Mühlendamm 27, 48499 Salzbergen, Germany, email: <span class="js-mail">(email address is shown with JavaScript enabled)</span></p>
+
+      <h3>2. Visiting this page (hosting on GitHub Pages)</h3>
+      <p>This page is provided via GitHub Pages (GitHub Inc., 88 Colin P. Kelly Jr. St., San Francisco, CA 94107, USA).
+        When you visit it, GitHub processes technically necessary data such as your IP address, date and time, the page requested and
+        browser information in order to deliver the page and ensure security. The legal basis is Art. 6(1)(f) GDPR
+        (legitimate interest in secure, functioning provision). Data may be transferred to the USA; GitHub is certified under the
+        EU-US Data Privacy Framework. More information:
+        <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub privacy statement</a>.</p>
+
+      <h3>3. No cookies, no tracking</h3>
+      <p>This page sets no cookies, uses no analytics or advertising services and loads no fonts or scripts from third parties.
+        Only your language choice is remembered in your browser. Your device ID and your entries are processed exclusively in your browser
+        and are not sent to me or third parties until you send the email yourself.</p>
+
+      <h3>4. Payment via PayPal</h3>
+      <p>When you pay, you are redirected to PayPal (PayPal (Europe) S.à r.l. et Cie, S.C.A., 22-24 Boulevard Royal, L-2449 Luxembourg).
+        PayPal processes your payment data under its own responsibility. PayPal provides me with your name, your PayPal email address,
+        the amount and the time of payment. The legal basis is Art. 6(1)(b) GDPR (performance of a contract). More information:
+        <a href="https://www.paypal.com/en/legalhub/privacy-full" target="_blank" rel="noopener">PayPal privacy statement</a>.</p>
+
+      <h3>5. Requesting the unlock code by email</h3>
+      <p>To send you the unlock code I process your email address, your device ID and the name or email address of your PayPal account
+        in order to match your payment. The legal basis is Art. 6(1)(b) GDPR. My mailbox is operated by Google (Google Ireland Limited,
+        Gordon House, Barrow Street, Dublin 4, Ireland); data may be transferred to the USA, Google is certified under the
+        EU-US Data Privacy Framework.</p>
+
+      <h3>6. Storage period</h3>
+      <p>I keep order and payment data for as long as statutory retention obligations require (under German commercial and tax law
+        usually 8 or 10 years). They are then deleted. I keep the device ID as long as the unlock can be used, so that I can help you
+        with questions or a change of device.</p>
+
+      <h3>7. The watch face on your watch</h3>
+      <ul>
+        <li>The device ID is calculated on the watch from an identifier of the device and is not transmitted automatically. You only share it when you request an unlock code.</li>
+        <li>Heart rate, steps, Body Battery, weather and other values are only read and displayed on the watch. They are not transmitted to me.</li>
+        <li>Weather, sunrise and sunset: these values are provided on the watch by the Garmin Connect app or Garmin; the watch face itself does not call any internet services.</li>
+        <li>Garmin is responsible for the download and settings in the Connect IQ Store.</li>
+      </ul>
+
+      <h3>8. Your rights</h3>
+      <p>You have the right of access (Art. 15 GDPR), rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18),
+        data portability (Art. 20) and to object to processing based on legitimate interests (Art. 21). Simply contact me by email.
+        You can also lodge a complaint with a data protection supervisory authority, for example your local authority or the one
+        responsible for me: Die Landesbeauftragte für den Datenschutz Niedersachsen, Prinzenstraße 5, 30159 Hannover, Germany.</p>
+      <p>Last updated: November 2026</p>
+      </div>
+    </details>
+
+    <details id="widerruf">
+      <summary data-i18n="widerruf">Widerrufsbelehrung</summary>
+      <div class="lg-de" lang="de">
+      <h3>Widerrufsrecht</h3>
+      <p>Du hast das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen.
+        Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsabschlusses.</p>
+      <p>Um dein Widerrufsrecht auszuüben, musst du mich (Swen Kögler, Mühlendamm 27, 48499 Salzbergen, Telefon +49 5976 6079997,
+        E-Mail: <span class="js-mail">(E-Mail-Adresse wird mit aktiviertem JavaScript angezeigt)</span>) mittels einer eindeutigen Erklärung (z. B. ein mit der Post versandter Brief
+        oder eine E-Mail) über deinen Entschluss, diesen Vertrag zu widerrufen, informieren. Du kannst dafür das unten stehende
+        Muster-Widerrufsformular verwenden, das jedoch nicht vorgeschrieben ist.</p>
+      <p>Zur Wahrung der Widerrufsfrist reicht es aus, dass du die Mitteilung über die Ausübung des Widerrufsrechts vor Ablauf der Widerrufsfrist absendest.</p>
+
+      <h3>Folgen des Widerrufs</h3>
+      <p>Wenn du diesen Vertrag widerrufst, habe ich dir alle Zahlungen, die ich von dir erhalten habe, unverzüglich und spätestens binnen
+        vierzehn Tagen ab dem Tag zurückzuzahlen, an dem die Mitteilung über deinen Widerruf dieses Vertrags bei mir eingegangen ist.
+        Für diese Rückzahlung verwende ich dasselbe Zahlungsmittel, das du bei der ursprünglichen Transaktion eingesetzt hast, es sei denn,
+        mit dir wurde ausdrücklich etwas anderes vereinbart; in keinem Fall werden dir wegen dieser Rückzahlung Entgelte berechnet.</p>
+
+      <h3>Vorzeitiges Erlöschen des Widerrufsrechts</h3>
+      <p>Das Widerrufsrecht erlischt bei einem Vertrag über die Bereitstellung von nicht auf einem körperlichen Datenträger befindlichen
+        digitalen Inhalten (hier: Freischaltcode für die Vollversion des Watch Faces „World Chrono“), wenn ich mit der Vertragserfüllung begonnen habe,
+        nachdem du</p>
+      <ul>
+        <li>ausdrücklich zugestimmt hast, dass ich vor Ablauf der Widerrufsfrist mit der Vertragserfüllung beginne,</li>
+        <li>deine Kenntnis davon bestätigt hast, dass du durch deine Zustimmung mit Beginn der Vertragserfüllung dein Widerrufsrecht verlierst, und</li>
+        <li>ich dir eine Bestätigung des Vertrags auf einem dauerhaften Datenträger (per E-Mail) zur Verfügung gestellt habe.</li>
+      </ul>
+      <p>Die Zustimmung erteilst du auf dieser Seite vor der Zahlung. Mit der Zusendung des Freischaltcodes, der zusammen mit der
+        Vertragsbestätigung per E-Mail erfolgt, erlischt dein Widerrufsrecht.</p>
+
+      <h3>Muster-Widerrufsformular</h3>
+      <div class="box">
+        <p>(Wenn du den Vertrag widerrufen willst, dann fülle bitte dieses Formular aus und sende es zurück.)</p>
+        <p>An Swen Kögler, Mühlendamm 27, 48499 Salzbergen, E-Mail: <span class="js-mail">(E-Mail-Adresse wird mit aktiviertem JavaScript angezeigt)</span></p>
+        <p>Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über die Bereitstellung der folgenden digitalen Inhalte:
+          Freischaltcode Watch Face „World Chrono“</p>
+        <p>Bestellt am (*) / erhalten am (*): ____________<br>
+          Name des/der Verbraucher(s): ____________<br>
+          Anschrift des/der Verbraucher(s): ____________<br>
+          Unterschrift des/der Verbraucher(s) (nur bei Mitteilung auf Papier): ____________<br>
+          Datum: ____________</p>
+        <p>(*) Unzutreffendes streichen.</p>
+      </div>
+      </div>
+      <div class="lg-en" lang="en" hidden>
+      <h3>Right of withdrawal</h3>
+      <p>You have the right to withdraw from this contract within fourteen days without giving any reason.
+        The withdrawal period is fourteen days from the day the contract is concluded.</p>
+      <p>To exercise your right of withdrawal, you must inform me (Swen Kögler, Mühlendamm 27, 48499 Salzbergen, Germany,
+        phone +49 5976 6079997, email: <span class="js-mail">(email address is shown with JavaScript enabled)</span>) of your decision to withdraw from this contract by an unequivocal statement
+        (e.g. a letter sent by post or an email). You may use the model withdrawal form below, but it is not obligatory.</p>
+      <p>To meet the withdrawal deadline, it is sufficient for you to send your communication concerning the exercise of the right of
+        withdrawal before the withdrawal period has expired.</p>
+
+      <h3>Effects of withdrawal</h3>
+      <p>If you withdraw from this contract, I shall reimburse all payments received from you without undue delay and in any event
+        no later than fourteen days from the day on which I am informed of your decision to withdraw from this contract.
+        I will carry out such reimbursement using the same means of payment as you used for the initial transaction, unless you have
+        expressly agreed otherwise; in any event, you will not incur any fees as a result of such reimbursement.</p>
+
+      <h3>Early expiry of the right of withdrawal</h3>
+      <p>For a contract for the supply of digital content not supplied on a tangible medium (here: unlock code for the full version
+        of the watch face “World Chrono”), the right of withdrawal expires once I have begun performance of the contract after you have</p>
+      <ul>
+        <li>expressly consented to my beginning performance before the end of the withdrawal period,</li>
+        <li>acknowledged that you thereby lose your right of withdrawal once performance has begun, and</li>
+        <li>I have provided you with a confirmation of the contract on a durable medium (by email).</li>
+      </ul>
+      <p>You give your consent on this page before paying. Your right of withdrawal expires when the unlock code is sent to you
+        together with the contract confirmation by email.</p>
+
+      <h3>Model withdrawal form</h3>
+      <div class="box">
+        <p>(If you want to withdraw from the contract, please complete and return this form.)</p>
+        <p>To Swen Kögler, Mühlendamm 27, 48499 Salzbergen, Germany, email: <span class="js-mail">(email address is shown with JavaScript enabled)</span></p>
+        <p>I/We (*) hereby give notice that I/We (*) withdraw from my/our (*) contract for the supply of the following digital content:
+          unlock code for the watch face “World Chrono”</p>
+        <p>Ordered on (*) / received on (*): ____________<br>
+          Name of consumer(s): ____________<br>
+          Address of consumer(s): ____________<br>
+          Signature of consumer(s) (only if this form is notified on paper): ____________<br>
+          Date: ____________</p>
+        <p>(*) Delete as appropriate.</p>
+      </div>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <span data-i18n="faq">Fragen? Nutze einfach den Button „E-Mail öffnen“.</span><br>
+    <a href="../">← Alle Watchfaces &amp; Apps</a><br>
+    <a href="#impressum" data-i18n="impressum">Impressum</a> · <a href="#datenschutz" data-i18n="datenschutz">Datenschutz</a> · <a href="#widerruf" data-i18n="widerruf">Widerrufsbelehrung</a>
+  </footer>
+</main>
+
+<script>
+  // ---- Konfiguration ----
+  // Mailadresse in Teilen, damit Adress-Sammler sie nicht im Quelltext finden.
+  // Auf der Seite erscheint sie nur als Bild, der mailto-Link entsteht erst beim Klick auf „E-Mail öffnen“.
+  const EMAIL = ["He" + "Ats" + "szeen", ["gmail", "com"].join(".")].join(String.fromCharCode(64));
+  const PAYPAL_ME = "https://paypal.me/sja911/1.99EUR";   // Betrag und Währung bereits enthalten
+  const APP_NAME = "World Chrono";
+  // -----------------------
+
+  const $ = id => document.getElementById(id);
+  const normalize = s => (s || "").toUpperCase().replace(/[^0-9A-F]/g, "");
+  const dashed = s => s.slice(0, 4) + "-" + s.slice(4);
+
+  // ---- Sprachen der Seite (Rechtstexte: Deutsch verbindlich, Englisch als Übersetzung) ----
+  const W = '<a href="#widerruf" style="color:var(--accent)">', D = '<a href="#datenschutz" style="color:var(--accent)">', E = '</a>';
+  const I18N = {
+    en: {
+      title: "Unlock “World Chrono”", subtitle: "Full version for your Garmin watch – one-off payment, no subscription",
+      price: "€1.99", vatNote: "Final price. No VAT is charged (small business, § 19 German VAT Act).",
+      s1h: "Your device ID", copy: "Copy", copied: "Copied ✓",
+      idHintShow: "You can also find it in the Garmin Connect app in the watch face settings.",
+      idHintEnter: "You can find it in the Garmin Connect app in the watch face settings, field “Unlock”.",
+      idErr: "The device ID has exactly 8 characters (0–9, A–F).",
+      s2h: "Pay €1.99 with PayPal",
+      s2p: "The amount is already filled in. Remember the <strong>name or email address of your PayPal account</strong> – you will need it in the next step so your payment can be matched.",
+      consent: "I expressly agree that the unlock code will be delivered before the withdrawal period ends. I understand that I lose my " + W + "right of withdrawal" + E + " once the code is delivered.",
+      payBtn: "Pay with PayPal",
+      payHint: "By clicking “Pay with PayPal” and completing the payment you buy the full version of “World Chrono” with obligation to pay. The " + D + "privacy notice" + E + " applies.",
+      s3h: "Request your unlock code",
+      s3p: "Opens your mail app with a ready-made message including your device ID. Just send it – the unlock code will be sent as a reply to that email address.",
+      payerLbl: "Name or email of your PayPal account", payerPh: "e.g. Jane Smith", payerHint: "This lets me match your payment to your request.",
+      mailBtn: "Open email", noMail: "If no mail app opens:", showAddr: "Show email address", writeTo: "Write to this address with your device ID:",
+      s4h: "Enter the code",
+      s4p: "You will receive your code by email. Enter it in the Garmin Connect app under <strong>Watch faces → World Chrono → Settings → Unlock code</strong> and save. Done!",
+      faq: "Questions? Just use the “Open email” button.",
+      impressum: "Legal notice", datenschutz: "Privacy policy", widerruf: "Right of withdrawal",
+      legalNote: "The legal texts are shown in English for your convenience. Only the German version is legally binding."
+    },
+    de: {
+      title: "„World Chrono“ freischalten", subtitle: "Vollversion für deine Garmin-Uhr – einmalig, ohne Abo",
+      price: "1,99 €", vatNote: "Endpreis. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.",
+      s1h: "Deine Geräte-ID", copy: "Kopieren", copied: "Kopiert ✓",
+      idHintShow: "Steht auch in der Garmin-Connect-App in den Einstellungen des Watch Faces.",
+      idHintEnter: "Du findest sie in der Garmin-Connect-App unter den Einstellungen des Watch Faces im Feld „Freischaltung“.",
+      idErr: "Die Geräte-ID hat genau 8 Zeichen (0–9, A–F).",
+      s2h: "1,99 € per PayPal bezahlen",
+      s2p: "Der Betrag ist bereits eingetragen. Merke dir den <strong>Namen bzw. die E-Mail-Adresse deines PayPal-Kontos</strong> – du brauchst sie im nächsten Schritt, damit deine Zahlung zugeordnet werden kann.",
+      consent: "Ich stimme ausdrücklich zu, dass mir der Freischaltcode vor Ablauf der Widerrufsfrist geliefert wird. Mir ist bekannt, dass ich mit Lieferung des Codes mein " + W + "Widerrufsrecht" + E + " verliere.",
+      payBtn: "Mit PayPal bezahlen",
+      payHint: "Mit Klick auf „Mit PayPal bezahlen“ und der Zahlung kaufst du die Vollversion von „World Chrono“ verbindlich. Es gelten die " + D + "Datenschutzhinweise" + E + ".",
+      s3h: "Freischaltcode anfordern",
+      s3p: "Öffnet deine Mail-App mit einer fertigen Nachricht inklusive Geräte-ID. Einfach absenden – der Freischaltcode kommt als Antwort an genau diese E-Mail-Adresse.",
+      payerLbl: "Name oder E-Mail deines PayPal-Kontos", payerPh: "z. B. Max Mustermann", payerHint: "Damit wird deine Zahlung deiner Anfrage zugeordnet.",
+      mailBtn: "E-Mail öffnen", noMail: "Falls sich keine Mail-App öffnet:", showAddr: "Mailadresse anzeigen", writeTo: "Schreibe mit deiner Geräte-ID an:",
+      s4h: "Code eintragen",
+      s4p: "Du bekommst deinen Code per Mail. Trage ihn in der Garmin-Connect-App unter <strong>Watch Faces → World Chrono → Einstellungen → Freischaltcode</strong> ein und speichere. Fertig!",
+      faq: "Fragen? Nutze einfach den Button „E-Mail öffnen“.",
+      impressum: "Impressum", datenschutz: "Datenschutzerklärung", widerruf: "Widerrufsbelehrung",
+      legalNote: ""
+    },
+    fr: {
+      title: "Débloquer « World Chrono »", subtitle: "Version complète pour votre montre Garmin – paiement unique, sans abonnement",
+      price: "1,99 €", vatNote: "Prix final. TVA non applicable (micro-entreprise, § 19 UStG, Allemagne).",
+      s1h: "Votre ID d'appareil", copy: "Copier", copied: "Copié ✓",
+      idHintShow: "Vous le trouvez aussi dans l'application Garmin Connect, dans les réglages du cadran.",
+      idHintEnter: "Vous le trouvez dans l'application Garmin Connect, dans les réglages du cadran, champ « Déverrouillage ».",
+      idErr: "L'ID d'appareil comporte exactement 8 caractères (0–9, A–F).",
+      s2h: "Payer 1,99 € avec PayPal",
+      s2p: "Le montant est déjà saisi. Notez le <strong>nom ou l'adresse e-mail de votre compte PayPal</strong> – vous en aurez besoin à l'étape suivante pour que votre paiement puisse être identifié.",
+      consent: "J'accepte expressément que le code de déverrouillage me soit fourni avant la fin du délai de rétractation. Je reconnais perdre mon " + W + "droit de rétractation" + E + " dès la fourniture du code.",
+      payBtn: "Payer avec PayPal",
+      payHint: "En cliquant sur « Payer avec PayPal » et en effectuant le paiement, vous achetez la version complète de « World Chrono » avec obligation de paiement. La " + D + "politique de confidentialité" + E + " s'applique.",
+      s3h: "Demander le code de déverrouillage",
+      s3p: "Ouvre votre application e-mail avec un message prêt à l'envoi contenant votre ID d'appareil. Envoyez-le simplement – le code vous sera envoyé en réponse à cette adresse e-mail.",
+      payerLbl: "Nom ou e-mail de votre compte PayPal", payerPh: "p. ex. Marie Dupont", payerHint: "Cela permet d'associer votre paiement à votre demande.",
+      mailBtn: "Ouvrir l'e-mail", noMail: "Si aucune application e-mail ne s'ouvre :", showAddr: "Afficher l'adresse e-mail", writeTo: "Écrivez à cette adresse avec votre ID d'appareil :",
+      s4h: "Saisir le code",
+      s4p: "Vous recevez votre code par e-mail. Saisissez-le dans l'application Garmin Connect sous <strong>Cadrans → World Chrono → Réglages → Code de déverrouillage</strong> et enregistrez. C'est fait !",
+      faq: "Des questions ? Utilisez simplement le bouton « Ouvrir l'e-mail ».",
+      impressum: "Mentions légales", datenschutz: "Confidentialité", widerruf: "Droit de rétractation",
+      legalNote: "Les textes juridiques sont disponibles en allemand (version faisant foi) et en anglais."
+    },
+    es: {
+      title: "Desbloquear «World Chrono»", subtitle: "Versión completa para tu reloj Garmin – pago único, sin suscripción",
+      price: "1,99 €", vatNote: "Precio final. No se aplica IVA (pequeña empresa, § 19 UStG, Alemania).",
+      s1h: "Tu ID de dispositivo", copy: "Copiar", copied: "Copiado ✓",
+      idHintShow: "También aparece en la app Garmin Connect, en los ajustes de la esfera.",
+      idHintEnter: "La encontrarás en la app Garmin Connect, en los ajustes de la esfera, campo «Desbloqueo».",
+      idErr: "El ID de dispositivo tiene exactamente 8 caracteres (0–9, A–F).",
+      s2h: "Pagar 1,99 € con PayPal",
+      s2p: "El importe ya está indicado. Recuerda el <strong>nombre o el correo de tu cuenta PayPal</strong>: lo necesitarás en el siguiente paso para poder asignar tu pago.",
+      consent: "Acepto expresamente que el código de desbloqueo se me entregue antes de que finalice el plazo de desistimiento. Soy consciente de que pierdo mi " + W + "derecho de desistimiento" + E + " con la entrega del código.",
+      payBtn: "Pagar con PayPal",
+      payHint: "Al hacer clic en «Pagar con PayPal» y completar el pago, compras la versión completa de «World Chrono» con obligación de pago. Se aplica la " + D + "política de privacidad" + E + ".",
+      s3h: "Solicitar el código de desbloqueo",
+      s3p: "Abre tu app de correo con un mensaje listo que incluye tu ID de dispositivo. Solo tienes que enviarlo: el código llegará como respuesta a esa dirección de correo.",
+      payerLbl: "Nombre o correo de tu cuenta PayPal", payerPh: "p. ej. Lucía García", payerHint: "Así puedo asignar tu pago a tu solicitud.",
+      mailBtn: "Abrir correo", noMail: "Si no se abre ninguna app de correo:", showAddr: "Mostrar dirección de correo", writeTo: "Escribe a esta dirección con tu ID de dispositivo:",
+      s4h: "Introducir el código",
+      s4p: "Recibirás tu código por correo. Introdúcelo en la app Garmin Connect en <strong>Esferas → World Chrono → Ajustes → Código de desbloqueo</strong> y guarda. ¡Listo!",
+      faq: "¿Preguntas? Usa el botón «Abrir correo».",
+      impressum: "Aviso legal", datenschutz: "Privacidad", widerruf: "Derecho de desistimiento",
+      legalNote: "Los textos legales están disponibles en alemán (versión vinculante) y en inglés."
+    },
+    it: {
+      title: "Sblocca «World Chrono»", subtitle: "Versione completa per il tuo orologio Garmin – pagamento unico, senza abbonamento",
+      price: "1,99 €", vatNote: "Prezzo finale. IVA non applicata (piccola impresa, § 19 UStG, Germania).",
+      s1h: "Il tuo ID dispositivo", copy: "Copia", copied: "Copiato ✓",
+      idHintShow: "Lo trovi anche nell'app Garmin Connect, nelle impostazioni del quadrante.",
+      idHintEnter: "Lo trovi nell'app Garmin Connect, nelle impostazioni del quadrante, campo «Sblocco».",
+      idErr: "L'ID dispositivo ha esattamente 8 caratteri (0–9, A–F).",
+      s2h: "Paga 1,99 € con PayPal",
+      s2p: "L'importo è già inserito. Ricorda il <strong>nome o l'indirizzo e-mail del tuo account PayPal</strong>: ti servirà nel passaggio successivo per abbinare il pagamento.",
+      consent: "Acconsento espressamente che il codice di sblocco mi venga fornito prima della scadenza del periodo di recesso. Sono consapevole di perdere il mio " + W + "diritto di recesso" + E + " con la consegna del codice.",
+      payBtn: "Paga con PayPal",
+      payHint: "Facendo clic su «Paga con PayPal» e completando il pagamento acquisti la versione completa di «World Chrono» con obbligo di pagamento. Si applica l'" + D + "informativa sulla privacy" + E + ".",
+      s3h: "Richiedi il codice di sblocco",
+      s3p: "Apre la tua app di posta con un messaggio pronto che include l'ID dispositivo. Basta inviarlo: il codice arriverà in risposta a quell'indirizzo e-mail.",
+      payerLbl: "Nome o e-mail del tuo account PayPal", payerPh: "ad es. Giulia Rossi", payerHint: "Così posso abbinare il pagamento alla tua richiesta.",
+      mailBtn: "Apri e-mail", noMail: "Se non si apre nessuna app di posta:", showAddr: "Mostra indirizzo e-mail", writeTo: "Scrivi a questo indirizzo con il tuo ID dispositivo:",
+      s4h: "Inserisci il codice",
+      s4p: "Riceverai il codice via e-mail. Inseriscilo nell'app Garmin Connect in <strong>Quadranti → World Chrono → Impostazioni → Codice di sblocco</strong> e salva. Fatto!",
+      faq: "Domande? Usa il pulsante «Apri e-mail».",
+      impressum: "Note legali", datenschutz: "Privacy", widerruf: "Diritto di recesso",
+      legalNote: "I testi legali sono disponibili in tedesco (versione vincolante) e in inglese."
+    },
+    nl: {
+      title: "‘World Chrono’ ontgrendelen", subtitle: "Volledige versie voor je Garmin-horloge – eenmalig, geen abonnement",
+      price: "€ 1,99", vatNote: "Eindprijs. Er wordt geen btw berekend (kleine ondernemer, § 19 UStG, Duitsland).",
+      s1h: "Je apparaat-ID", copy: "Kopiëren", copied: "Gekopieerd ✓",
+      idHintShow: "Staat ook in de Garmin Connect-app bij de instellingen van de wijzerplaat.",
+      idHintEnter: "Je vindt hem in de Garmin Connect-app bij de instellingen van de wijzerplaat, veld ‘Ontgrendeling’.",
+      idErr: "De apparaat-ID heeft precies 8 tekens (0–9, A–F).",
+      s2h: "€ 1,99 betalen met PayPal",
+      s2p: "Het bedrag is al ingevuld. Onthoud de <strong>naam of het e-mailadres van je PayPal-account</strong> – die heb je in de volgende stap nodig om je betaling te koppelen.",
+      consent: "Ik ga er uitdrukkelijk mee akkoord dat de ontgrendelcode vóór het einde van de herroepingstermijn wordt geleverd. Ik weet dat ik met de levering van de code mijn " + W + "herroepingsrecht" + E + " verlies.",
+      payBtn: "Betalen met PayPal",
+      payHint: "Door op ‘Betalen met PayPal’ te klikken en te betalen, koop je de volledige versie van ‘World Chrono’ met betalingsverplichting. De " + D + "privacyverklaring" + E + " is van toepassing.",
+      s3h: "Ontgrendelcode aanvragen",
+      s3p: "Opent je mailapp met een kant-en-klaar bericht inclusief apparaat-ID. Gewoon versturen – de code komt als antwoord naar dat e-mailadres.",
+      payerLbl: "Naam of e-mail van je PayPal-account", payerPh: "bijv. Sanne de Vries", payerHint: "Zo kan ik je betaling aan je aanvraag koppelen.",
+      mailBtn: "E-mail openen", noMail: "Opent er geen mailapp?", showAddr: "E-mailadres tonen", writeTo: "Schrijf naar dit adres met je apparaat-ID:",
+      s4h: "Code invoeren",
+      s4p: "Je ontvangt je code per e-mail. Voer hem in de Garmin Connect-app in bij <strong>Wijzerplaten → World Chrono → Instellingen → Ontgrendelcode</strong> en sla op. Klaar!",
+      faq: "Vragen? Gebruik gewoon de knop ‘E-mail openen’.",
+      impressum: "Colofon", datenschutz: "Privacy", widerruf: "Herroepingsrecht",
+      legalNote: "De juridische teksten zijn beschikbaar in het Duits (bindende versie) en in het Engels."
+    }
+  };
+  const LANGS = Object.keys(I18N);
+  function pickLang() {
+    try { const saved = localStorage.getItem("siteLang"); if (LANGS.includes(saved)) return saved; } catch (e) {}
+    const urlLang = new URLSearchParams(location.search).get("lang");
+    if (LANGS.includes(urlLang)) return urlLang;
+    for (const l of (navigator.languages || [navigator.language || "en"])) {
+      const c = (l || "").slice(0, 2).toLowerCase();
+      if (LANGS.includes(c)) return c;
+    }
+    return "en";
+  }
+  let LANG = pickLang();
+  const T = k => (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || "";
+  function setLang(l) {
+    LANG = LANGS.includes(l) ? l : "en";
+    document.documentElement.lang = LANG;
+    document.querySelectorAll("[data-i18n]").forEach(el => { const v = T(el.dataset.i18n); if (v) el.innerHTML = v; });
+    document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = T(el.dataset.i18nPh));
+    const de = LANG === "de";
+    document.querySelectorAll(".lg-de").forEach(el => el.hidden = !de);
+    document.querySelectorAll(".lg-en").forEach(el => el.hidden = de);
+    const note = document.getElementById("legalNote");
+    note.hidden = de; note.textContent = T("legalNote");
+    document.querySelectorAll("#langs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === LANG ? "true" : "false"));
+    document.title = T("title");
+    if (typeof updateMail === "function") updateMail();
+  }
+
+  // Mail an mich: Deutsch für deutsche Seite, sonst Englisch (ich lese beides)
+  function mailHref(id, payer) {
+    const de = LANG === "de";
+    const subject = de ? `Freischaltcode ${APP_NAME} – Geräte-ID ${id}` : `Unlock code ${APP_NAME} – device ID ${id}`;
+    const body = de ?
+`Hallo,
+
+ich habe ${APP_NAME} per PayPal bezahlt (1,99 €) und bitte um meinen Freischaltcode.
+
+Meine Geräte-ID: ${id}
+Mein PayPal-Konto (Name/E-Mail): ${payer}
+
+Ich habe vor der Zahlung ausdrücklich zugestimmt, dass mir der Freischaltcode vor Ablauf der Widerrufsfrist geliefert wird, und bestätigt, dass ich mit der Lieferung mein Widerrufsrecht verliere.
+
+Vielen Dank!` :
+`Hello,
+
+I have paid for ${APP_NAME} via PayPal (EUR 1.99) and would like to receive my unlock code.
+
+My device ID: ${id}
+My PayPal account (name/email): ${payer}
+Page language: ${LANG}
+
+Before paying, I expressly agreed that the unlock code is delivered before the withdrawal period ends, and I acknowledged that I lose my right of withdrawal once it is delivered.
+
+Thank you!`;
+    return `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
+  let currentId = "";
+
+  function updateMail() {
+    const payer = $("payerInput").value.trim();
+    const ok = currentId !== "" && payer.length >= 3;
+    $("mailBtn").setAttribute("aria-disabled", ok ? "false" : "true");
+  }
+
+  function apply(raw) {
+    currentId = raw.length === 8 ? dashed(raw) : "";
+    $("payBtn").href = PAYPAL_ME;
+    updateMail();
+    return currentId;
+  }
+
+  $("payerInput").addEventListener("input", updateMail);
+  $("mailBtn").addEventListener("click", e => {
+    e.preventDefault();
+    const payer = $("payerInput").value.trim();
+    if (currentId !== "" && payer.length >= 3) location.href = mailHref(currentId, payer);
+  });
+
+  // PayPal erst nach Zustimmung zum vorzeitigen Erlöschen des Widerrufsrechts
+  function updatePay() {
+    $("payBtn").setAttribute("aria-disabled", $("consent").checked ? "false" : "true");
+  }
+  $("consent").addEventListener("change", updatePay);
+  updatePay();
+
+  // Mailadresse in Impressum, Datenschutz und Widerruf erst per Skript einsetzen
+  setLang(LANG);
+  document.querySelectorAll("#langs button").forEach(b => b.addEventListener("click", () => {
+    setLang(b.dataset.lang);
+    try { localStorage.setItem("siteLang", b.dataset.lang); } catch (e) {}
+  }));
+
+  // Adresse wird als Bild gezeichnet: kein Text und kein mailto-Link im Seiteninhalt
+  function mailImage(ref) {
+    const cs = getComputedStyle(ref);
+    const font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const c = document.createElement("canvas"), r = window.devicePixelRatio || 1;
+    const ctx = c.getContext("2d"); ctx.font = font;
+    const w = Math.ceil(ctx.measureText(EMAIL).width) + 2, h = Math.ceil(parseFloat(cs.fontSize) * 1.4);
+    c.width = w * r; c.height = h * r; c.style.width = w + "px"; c.style.height = h + "px";
+    c.className = "mail"; c.setAttribute("role", "img"); c.setAttribute("aria-label", "E-Mail-Adresse (Bild)");
+    ctx.scale(r, r); ctx.font = font; ctx.fillStyle = cs.color; ctx.textBaseline = "middle";
+    ctx.fillText(EMAIL, 1, h / 2);
+    return c;
+  }
+  document.querySelectorAll(".js-mail").forEach(el => el.replaceWith(mailImage(el.parentElement)));
+
+  // Rechtstexte beim Sprung per Link (#impressum usw.) aufklappen
+  function openFromHash() {
+    const d = location.hash && document.querySelector("details" + location.hash);
+    if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  }
+  window.addEventListener("hashchange", openFromHash);
+  openFromHash();
+
+  $("showAddr").addEventListener("click", () => {
+    $("addrWrap").hidden = false;
+    $("showAddr").hidden = true;
+  });
+
+  // Geräte-ID aus dem Link (?id=A3F9-12C7) übernehmen, sonst eingeben lassen
+  const fromUrl = normalize(new URLSearchParams(location.search).get("id"));
+  if (fromUrl.length === 8) {
+    $("idShow").hidden = false;
+    $("idText").textContent = apply(fromUrl);
+  } else {
+    $("idEnter").hidden = false;
+    apply("");
+    $("idInput").addEventListener("input", e => {
+      const raw = normalize(e.target.value);
+      $("idErr").textContent = raw.length > 8 ? T("idErr") : "";
+      apply(raw.length === 8 ? raw : "");
+    });
+  }
+
+  $("copyId").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText($("idText").textContent); $("copyId").textContent = T("copied"); } catch (e) {}
+  });
+</script>
+</body>
+</html>
